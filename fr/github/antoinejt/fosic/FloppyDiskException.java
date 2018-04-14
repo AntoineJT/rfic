@@ -1,6 +1,7 @@
 package fr.github.antoinejt.fosic;
 
 public class FloppyDiskException extends Throwable {
+	private static final long serialVersionUID = 1L;
 	public FloppyDiskException() {
 		try {
 			throw new Exception();

@@ -1,5 +1,6 @@
 package fr.github.antoinejt.fosic.ui;
 
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -8,12 +9,19 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 public class ExtendedJOptionPane extends JOptionPane {
+	private static final long serialVersionUID = 1L;
 	private static int ret=-1;
+	
 	public static int showJComboBox(String title, String message, String[] values) {
+		return showJComboBox(title,null,message,values);
+	}
+	
+	public static int showJComboBox(String title, Image icon, String message, String[] values) {
 		ret=-1;
 		JDialog jd = new JDialog();
+		jd.setIconImage(icon);
 		JOptionPane jop = new JOptionPane(message, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION);
-		JComboBox mode = new JComboBox(values);
+		JComboBox<String> mode = new JComboBox<String>(values);
 		jop.remove(1);
 		jop.add(mode);
 		KeyListener kl = new KeyListener() {
@@ -26,20 +34,18 @@ public class ExtendedJOptionPane extends JOptionPane {
 		jop.addKeyListener(kl);
 		jd.addKeyListener(kl);
 		mode.addKeyListener(kl);
-		if (title!=null)
-			jd.setTitle(title);
+		if (title!=null) jd.setTitle(title);
 		jd.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		jd.getContentPane().add(jop);
 		jd.pack();
 		jd.setLocationRelativeTo(null);
 		jd.setVisible(true);
-		while(ret==-1&&jd.isDisplayable()) {
+		while(ret==-1&&jd.isDisplayable())
 			try {
 				Thread.sleep(250L);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
 		jd.dispose();
 		return ret;
 	}
