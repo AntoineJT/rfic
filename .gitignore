@@ -1,6 +1,7 @@
 # Binaries
 *.class
 *.jar
+out/
 
 # Visual Studio Code / Eclipse useless files
 .classpath
