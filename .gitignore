@@ -8,3 +8,9 @@
 
 # Visual Studio Code useless folder
 .vscode/
+
+# IntelliJ useless folder
+.idea/
+
+# IntelliJ useless files
+*.iml
