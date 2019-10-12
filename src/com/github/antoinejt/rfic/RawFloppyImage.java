@@ -6,44 +6,63 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 public class RawFloppyImage {
-    private int sctrsz; // Sector Size
-    private int nbrsct; // Number of Sectors
+    private int sectorSize;
+    private int numberOfSectors;
 
-    public RawFloppyImage(final int sctrsz, final int nbrsct) {
-        if (sctrsz < 0)
-            throw new IllegalArgumentException("Sector Size CAN'T be NEGATIVE!!!");
-        else if ((Float.valueOf(sctrsz / 512).intValue() * 512) != sctrsz)
-            throw new IllegalArgumentException("Sector Size MUST be POWERED OF 512!!!");
-        else
-            this.sctrsz = sctrsz;
-        if (nbrsct < 0)
-            throw new IllegalArgumentException("Number of Sector CAN'T be NEGATIVE!!!");
-        else
-            this.nbrsct = nbrsct;
+    public RawFloppyImage(final int sectorSize, final int numberOfSectors) {
+        if (sectorSize < 0) {
+			throw new IllegalArgumentException("Sector size can't be negative!");
+		}
+		// TODO This is probably stupid, replace it with a Math.floor(sctrsz / 512) will probably be better, and more make a method for it
+        if (sectorSize / 512 * 512 != sectorSize) {
+			throw new IllegalArgumentException("Sector size must be power OF 512!");
+		}
+        if (numberOfSectors < 0) {
+			throw new IllegalArgumentException("Number of sectors can't be negative!");
+		}
+
+        this.sectorSize = sectorSize;
+        this.numberOfSectors = numberOfSectors;
     }
 
-    public void createFloppy(final File[] in, final File out) throws FloppyDiskException {
-        final ArrayList<Byte> bytes = new ArrayList<Byte>();
-        long in_length = 0;
-        for (File f : in)
-            in_length += f.length();
-        if (in_length > (sctrsz * nbrsct))
-            throw new FloppyDiskException("Your floppy disk can't store so much data !");
-        for (File f : in)
-            try {
-                final byte[] b = Files.readAllBytes(Paths.get(f.getCanonicalPath()));
-                for (byte by : b)
-                    bytes.add(Byte.valueOf(by));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        while (bytes.size() < (sctrsz * nbrsct))
-            bytes.add((byte) 0);
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        for (byte by : bytes)
-            baos.write(Byte.valueOf(by).intValue());
+    private long getFileArrayByteLength(File[] files){
+    	long length = 0;
+
+    	for (File currentFile : files){
+    		length += currentFile.length();
+		}
+		return length;
+	}
+
+    public void createFloppy(File[] in, File out) throws FloppyDiskException {
+        List<Byte> bytes = new ArrayList<>();
+        long fileArrayByteLength = getFileArrayByteLength(in);
+
+        if (fileArrayByteLength > (sectorSize * numberOfSectors)) {
+			throw new FloppyDiskException("Your floppy disk can't store so much data!");
+		}
+        for (File currentFile : in) {
+			try {
+				final byte[] allBytes = Files.readAllBytes(Paths.get(currentFile.getCanonicalPath()));
+				for (byte b : allBytes) {
+					bytes.add(b);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+        while (bytes.size() < (sectorSize * numberOfSectors)) {
+			bytes.add((byte) 0);
+		}
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        for (byte by : bytes) {
+			baos.write(Byte.valueOf(by).intValue());
+		}
         try {
             Files.write(Paths.get(out.getCanonicalPath()), baos.toByteArray());
         } catch (IOException e) {
